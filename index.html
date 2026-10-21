@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fontbuilder: turn your handwriting into a font</title>
+    <meta
+      name="description"
+      content="Upload a photo of your handwriting, or draw on screen, and get a real font file you can install and use in Word, Pages, Outlook and email. Free, and nothing leaves your device."
+    />
+    <meta name="theme-color" content="#f7f4ee" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f4fd1'/%3E%3Cpath d='M18 46c6-2 9-10 12-20s5-12 8-12 3 6-2 14-9 14-4 16 8-4 12-6' fill='none' stroke='%23fff' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#collect">Skip to the tool</a>
+    <header class="hero">
+      <div class="wrap">
+        <p class="brand">Fontbuilder</p>
+        <h1>Turn your handwriting into a font</h1>
+        <p class="lede">
+          Write your letters on paper or on screen and get a real font file. Install it and type in your own handwriting in
+          Word, Pages, Outlook, email signatures and more.
+        </p>
+        <p class="privacy">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1Zm2 0h6V7a3 3 0 0 0-6 0v3Z" /></svg>
+          Everything happens in your browser. Your handwriting is never uploaded anywhere.
+        </p>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="card" id="collect" aria-labelledby="collect-title">
+        <div class="step-head">
+          <span class="step-num" aria-hidden="true">1</span>
+          <div>
+            <h2 id="collect-title">Add your handwriting</h2>
+            <p>Pick whichever is easiest. You can mix them: a newer version of a letter replaces the older one.</p>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Ways to add handwriting">
+          <button class="tab" role="tab" id="tab-template" aria-controls="panel-template" aria-selected="true">
+            <span class="long">Fill in a template</span><span class="short">Template</span> <span class="badge">Best results</span>
+          </button>
+          <button class="tab" role="tab" id="tab-photo" aria-controls="panel-photo" aria-selected="false" tabindex="-1">
+            <span class="long">Photo of any handwriting</span><span class="short">Photo</span>
+          </button>
+          <button class="tab" role="tab" id="tab-draw" aria-controls="panel-draw" aria-selected="false" tabindex="-1">
+            <span class="long">Draw on screen</span><span class="short">Draw</span>
+          </button>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="panel-template" aria-labelledby="tab-template">
+          <ol class="howto">
+            <li>
+              <strong>Print the template.</strong>
+              <div class="inline-controls">
+                <label>Paper
+                  <select id="paper">
+                    <option value="letter">US Letter</option>
+                    <option value="a4">A4</option>
+                  </select>
+                </label>
+                <label class="check"><input type="checkbox" id="include-page2" /> Include page 2 (symbols &amp; accented letters)</label>
+              </div>
+              <div class="button-row">
+                <button class="btn primary" id="download-template">Download PDF</button>
+                <button class="btn" id="print-template">Print</button>
+              </div>
+            </li>
+            <li>
+              <strong>Fill it in</strong> with a dark pen or felt-tip, one character per box, resting on the dotted line.
+              Tails of g, j, p, q and y hang below it.
+            </li>
+            <li>
+              <strong>Photograph or scan each page</strong> from straight above, in good light, with all four black corner squares
+              in the picture.
+            </li>
+          </ol>
+          <label class="dropzone" id="template-drop">
+            <input type="file" accept="image/*" multiple id="template-input" class="visually-hidden" />
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 7 8h3v7h4V8h3l-5-5Zm-7 14v3h14v-3h2v5H3v-5h2Z" /></svg>
+            <strong>Upload your filled-in pages</strong>
+            <span>Drop photos or scans here, or click to choose files</span>
+          </label>
+          <ul class="results" id="template-results" aria-live="polite"></ul>
+          <details class="advanced">
+            <summary>Letters coming out too faint, too thick or speckled?</summary>
+            <label class="slider">
+              <span>Ink sensitivity</span>
+              <input type="range" id="ink-sensitivity" min="0.45" max="0.85" step="0.01" value="0.62" />
+            </label>
+            <p class="hint">
+              Slide right for pencil or light pens, left if paper texture shows up as specks. Pages you uploaded are re-read
+              straight away.
+            </p>
+          </details>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="panel-photo" aria-labelledby="tab-photo" hidden>
+          <p class="hint">
+            Works best with <strong>separate letters</strong> (not joined-up cursive), written large with a dark pen. For a
+            full set, try writing <q>THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG</q>, the same in small letters, and
+            <q>0123456789</q>, each on its own line.
+          </p>
+          <label class="dropzone" id="photo-drop">
+            <input type="file" accept="image/*" id="photo-input" class="visually-hidden" />
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 7 8h3v7h4V8h3l-5-5Zm-7 14v3h14v-3h2v5H3v-5h2Z" /></svg>
+            <strong>Upload a photo of your handwriting</strong>
+            <span>Drop an image here, or click to choose one</span>
+          </label>
+          <div id="photo-work" hidden>
+            <div class="photo-layout">
+              <div class="photo-view"><canvas id="photo-canvas"></canvas></div>
+              <div class="photo-side">
+                <label for="photo-text" class="field-label">What does it say? Type it exactly, line by line.</label>
+                <textarea id="photo-text" rows="5" spellcheck="false" placeholder="THE QUICK BROWN FOX&#10;the quick brown fox"></textarea>
+                <p class="status" id="photo-status" aria-live="polite"></p>
+                <ul class="warnings" id="photo-warnings"></ul>
+                <button class="btn primary" id="photo-add" disabled>Add letters to my font</button>
+              </div>
+            </div>
+            <h3>Check the letters</h3>
+            <p class="hint">
+              Fix any wrong labels. Use <strong>Join</strong> when one letter was found as two pieces, and
+              <strong>Skip</strong> for smudges or anything that isn't a letter.
+            </p>
+            <div class="shape-grid" id="photo-cards"></div>
+          </div>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="panel-draw" aria-labelledby="tab-draw" hidden>
+          <div class="draw-layout">
+            <div class="draw-pad">
+              <div class="draw-char-row">
+                <label for="draw-char" class="field-label">Character</label>
+                <input id="draw-char" maxlength="2" autocomplete="off" value="A" />
+                <button class="btn" id="draw-next">Next missing</button>
+              </div>
+              <canvas id="draw-canvas" width="400" height="400" aria-label="Drawing area"></canvas>
+              <div class="draw-tools">
+                <label class="slider compact"><span>Pen</span><input type="range" id="draw-pen" min="4" max="32" value="14" /></label>
+                <button class="btn" id="draw-undo">Undo</button>
+                <button class="btn" id="draw-clear">Clear</button>
+                <button class="btn primary" id="draw-save">Save letter</button>
+              </div>
+            </div>
+            <div class="hint">
+              <p>Draw with your finger, a stylus or the mouse. Rest letters on the <strong>solid line</strong>; tails of g, j, p, q and y go below it. The dashed line is a guide for the height of small letters.</p>
+              <p>After saving, the next missing character comes up automatically, so you can go straight through the alphabet.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="review" aria-labelledby="review-title">
+        <div class="step-head">
+          <span class="step-num" aria-hidden="true">2</span>
+          <div>
+            <h2 id="review-title">Check your characters</h2>
+            <p id="review-summary">Nothing yet. Add some handwriting above.</p>
+          </div>
+          <button class="btn subtle" id="clear-all" hidden>Start over</button>
+        </div>
+        <div id="glyph-grid"></div>
+      </section>
+
+      <section class="card" id="tune" aria-labelledby="tune-title">
+        <div class="step-head">
+          <span class="step-num" aria-hidden="true">3</span>
+          <div>
+            <h2 id="tune-title">Try it out</h2>
+            <p>Type anything below. Adjust the look until it feels like you.</p>
+          </div>
+        </div>
+        <div class="tune-layout">
+          <div class="controls">
+            <label class="slider"><span>Thickness</span><input type="range" id="set-weight" min="-30" max="40" step="5" /></label>
+            <label class="slider"><span>Letter spacing</span><input type="range" id="set-letter" min="-20" max="120" step="5" /></label>
+            <label class="slider"><span>Word spacing</span><input type="range" id="set-word" min="150" max="600" step="10" /></label>
+            <label class="slider"><span>Preview size</span><input type="range" id="preview-size" min="20" max="96" value="44" /></label>
+            <label class="check"><input type="checkbox" id="set-normalize" /> Even out the size</label>
+            <label class="check"><input type="checkbox" id="set-baseline" /> Line letters up neatly</label>
+            <label class="check"><input type="checkbox" id="set-fillcase" /> Use capitals for missing small letters (and the other way round)</label>
+            <div class="ink-row">
+              <span>Ink</span>
+              <label class="swatch"><input type="radio" name="ink" value="#1d2433" checked /><span style="--c: #1d2433" aria-label="Black"></span></label>
+              <label class="swatch"><input type="radio" name="ink" value="#1f3fb4" /><span style="--c: #1f3fb4" aria-label="Blue"></span></label>
+              <label class="swatch"><input type="radio" name="ink" value="#4a5160" /><span style="--c: #4a5160" aria-label="Grey"></span></label>
+              <label class="swatch"><input type="radio" name="ink" value="#9b1c31" /><span style="--c: #9b1c31" aria-label="Red"></span></label>
+            </div>
+          </div>
+          <div class="preview-box">
+            <textarea id="preview-text" spellcheck="false" aria-label="Preview text"></textarea>
+            <p class="status" id="build-status" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="use" aria-labelledby="use-title">
+        <div class="step-head">
+          <span class="step-num" aria-hidden="true">4</span>
+          <div>
+            <h2 id="use-title">Download &amp; use it</h2>
+            <p>Name your font, download it, then install it on your computer.</p>
+          </div>
+        </div>
+        <div class="download-row">
+          <label class="field">
+            <span class="field-label">Font name</span>
+            <input id="font-name" maxlength="31" autocomplete="off" />
+          </label>
+          <button class="btn primary big" id="download-font" disabled>Download font (.otf)</button>
+        </div>
+
+        <div class="image-export">
+          <div>
+            <h3>Need it in an email or Google Docs?</h3>
+            <p>
+              Emails and shared docs only show your font to people who have it installed too. To be sure everyone sees your
+              handwriting (a signature, a thank-you note), use your preview text as a picture:
+            </p>
+          </div>
+          <div class="button-row">
+            <button class="btn" id="copy-image" disabled>Copy as image</button>
+            <button class="btn" id="download-image" disabled>Download image (.png)</button>
+          </div>
+          <p class="status" id="image-status" aria-live="polite"></p>
+        </div>
+
+        <div class="guides">
+          <details>
+            <summary>Windows</summary>
+            <ol>
+              <li>Open the downloaded <code>.otf</code> file and click <strong>Install</strong> (or right-click it and choose <strong>Install</strong>).</li>
+              <li>Restart Word, Outlook or any app that was open. Your font is in the font list under the name you chose.</li>
+            </ol>
+          </details>
+          <details>
+            <summary>Mac</summary>
+            <ol>
+              <li>Double-click the downloaded <code>.otf</code> file and click <strong>Install Font</strong> in Font Book.</li>
+              <li>It appears in Pages, Keynote, Word, Mail and every other app's font list.</li>
+            </ol>
+          </details>
+          <details>
+            <summary>iPhone &amp; iPad</summary>
+            <p>
+              iOS only installs fonts through an app. Get a font installer from the App Store, open the <code>.otf</code>
+              with it and follow its steps. Afterwards the font works in Pages, Keynote, Word and other apps that let you pick
+              fonts. For Mail and Messages, use <strong>Copy as image</strong> instead.
+            </p>
+          </details>
+          <details>
+            <summary>Android &amp; Chromebook</summary>
+            <p>
+              These can't install fonts for every app. Apps that accept custom fonts let you import the <code>.otf</code>;
+              everywhere else, use <strong>Copy as image</strong>.
+            </p>
+          </details>
+          <details>
+            <summary>Word, Pages &amp; sharing documents</summary>
+            <p>
+              Pick your font from the font list. Other people only see it if they have it too, so before sending a document
+              either export it as a <strong>PDF</strong>, or in Word on Windows turn on
+              <em>File → Options → Save → Embed fonts in the file</em>.
+            </p>
+          </details>
+          <details>
+            <summary>Email (Gmail, Outlook, Apple Mail)</summary>
+            <p>
+              Desktop Outlook and Apple Mail let you write in any installed font, but recipients who don't have it see a
+              standard font instead. Web Gmail doesn't offer custom fonts at all. For a handwritten signature or note that
+              always looks right, click <strong>Copy as image</strong> and paste it into your message or signature settings.
+            </p>
+          </details>
+          <details>
+            <summary>Google Docs &amp; Slides</summary>
+            <p>
+              Google Docs can't use fonts from your computer. Paste your text as an image (<strong>Copy as image</strong>),
+              or write in Word, Pages or LibreOffice, where installed fonts work.
+            </p>
+          </details>
+          <details>
+            <summary>Websites, Canva &amp; design apps</summary>
+            <p>
+              Design apps that support uploaded fonts accept the <code>.otf</code> directly. On a website, upload the file
+              and use it with CSS:
+            </p>
+            <pre><code id="css-snippet"></code></pre>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer class="wrap footer">
+      <p>Fontbuilder makes fonts entirely on your device. The fonts you make are yours to use however you like.</p>
+    </footer>
+
+    <dialog id="glyph-dialog" aria-labelledby="glyph-dialog-title">
+      <form method="dialog" class="dialog-body">
+        <h3 id="glyph-dialog-title"></h3>
+        <div class="dialog-preview" id="glyph-dialog-preview"></div>
+        <p class="hint" id="glyph-dialog-source"></p>
+        <div class="button-row">
+          <button class="btn" value="draw" id="glyph-dialog-draw">Draw it instead</button>
+          <button class="btn danger" value="remove" id="glyph-dialog-remove">Remove</button>
+          <button class="btn primary" value="close">Done</button>
+        </div>
+      </form>
+    </dialog>
+    <iframe id="print-frame" title="Template for printing" class="print-frame" tabindex="-1" aria-hidden="true"></iframe>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
