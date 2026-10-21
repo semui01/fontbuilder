@@ -4,7 +4,7 @@ import { PAPER_SIZES, templatePdf, templateSvg, type Paper } from '../core/templ
 import type { GrayImage } from '../core/types';
 import { byId, debounce, fileDrop, h, nextFrame } from './dom';
 import { loadImageFile } from './imageio';
-import { canPrint, describeOutcome, saveFile } from './platform';
+import { canPrint, describeOutcome, oneAtATime, saveFile, savingAvailable } from './platform';
 import type { AppState } from './state';
 
 interface Scan {
@@ -54,11 +54,22 @@ export function setupTemplatePanel(state: AppState): void {
   if (navigator.language && !/^en-(US|CA)|^es-(MX|US)/i.test(navigator.language)) paper.value = 'a4';
 
   const templateStatus = byId('template-status');
-  byId('download-template').addEventListener('click', async () => {
-    const pdf = templatePdf(selectedPages(), paper.value as Paper);
-    templateStatus.textContent = describeOutcome(
-      await saveFile(new Blob([pdf as BlobPart], { type: 'application/pdf' }), 'handwriting-template.pdf'),
-    );
+  const downloadTemplate = byId('download-template');
+  downloadTemplate.addEventListener(
+    'click',
+    oneAtATime(async () => {
+      templateStatus.textContent = '';
+      const pdf = templatePdf(selectedPages(), paper.value as Paper);
+      templateStatus.textContent = describeOutcome(
+        await saveFile(new Blob([pdf as BlobPart], { type: 'application/pdf' }), 'handwriting-template.pdf'),
+      );
+    }),
+  );
+  void savingAvailable.then((ok) => {
+    if (ok) return;
+    downloadTemplate.hidden = true;
+    templateStatus.textContent =
+      "This view can't save files, so the template can't be downloaded here. You can still draw your letters on screen.";
   });
   const printButton = byId('print-template');
   // Some hosts (e.g. an Artifact viewer) can't open the print dialog; the PDF covers printing there.

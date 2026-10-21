@@ -46,6 +46,13 @@ The build is a static site with relative paths, so `dist/` can be hosted anywher
 `.github/workflows/deploy.yml` publishes it to GitHub Pages on every push to `main`; enable it once under
 **Settings → Pages → Source: GitHub Actions**.
 
+### As a claude.ai Artifact
+
+`npm run build:artifact` writes `dist-artifact/fontbuilder.html`, a single self-contained page that can be
+published as a claude.ai Artifact (declare the `downloads` capability). The app notices when it runs there:
+files are offered through the viewer's save prompt, the font comes as a `.zip` (the viewer can't save `.otf`
+directly), and the Print button is hidden because the viewer blocks print dialogs.
+
 ## Tests
 
 ```sh

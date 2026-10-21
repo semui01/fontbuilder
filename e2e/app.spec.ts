@@ -69,9 +69,12 @@ test('photo of handwriting → labelled letters', async ({ page }, testInfo) => 
 test('draw on screen, then remove a character', async ({ page }) => {
   await page.click('#tab-draw');
   await expect(page.locator('#draw-char')).toHaveValue('A');
-  const box = (await page.locator('#draw-canvas').boundingBox())!;
-  const at = (x: number, y: number) => [box.x + (x / 400) * box.width, box.y + (y / 400) * box.height] as const;
   const line = async (a: [number, number], b: [number, number]) => {
+    // Measure the canvas every time: other steps scroll the page.
+    const canvas = page.locator('#draw-canvas');
+    await canvas.scrollIntoViewIfNeeded();
+    const box = (await canvas.boundingBox())!;
+    const at = (x: number, y: number) => [box.x + (x / 400) * box.width, box.y + (y / 400) * box.height] as const;
     await page.mouse.move(...at(...a));
     await page.mouse.down();
     for (let i = 1; i <= 10; i += 1) await page.mouse.move(...at(a[0] + ((b[0] - a[0]) * i) / 10, a[1] + ((b[1] - a[1]) * i) / 10));
@@ -89,4 +92,16 @@ test('draw on screen, then remove a character', async ({ page }) => {
   await expect(page.locator('#glyph-dialog-source')).toHaveText('Drawn on screen.');
   await page.click('#glyph-dialog-remove');
   await expect(page.locator('#review-summary')).toContainText('Nothing yet');
+
+  // A "Start over" confirmation left open doesn't come back open later.
+  await line([200, 95], [200, 295]);
+  await page.click('#draw-save');
+  await page.click('#clear-all');
+  await expect(page.locator('#clear-confirm')).toBeVisible();
+  await page.locator('.glyph[aria-label="B"]').click();
+  await page.click('#glyph-dialog-remove');
+  await line([200, 95], [200, 295]);
+  await page.click('#draw-save');
+  await expect(page.locator('#clear-all')).toBeVisible();
+  await expect(page.locator('#clear-confirm')).toBeHidden();
 });

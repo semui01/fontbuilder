@@ -8,8 +8,9 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { build } from 'vite';
 
-const outDir = 'dist-artifact';
-const output = resolve(process.argv[2] ?? join(outDir, 'fontbuilder.html'));
+// Vite empties its output folder, so build into a subfolder and keep the result beside it.
+const outDir = 'dist-artifact/.build';
+const output = resolve(process.argv[2] ?? 'dist-artifact/fontbuilder.html');
 
 await build({
   logLevel: 'warn',
@@ -39,7 +40,6 @@ if (!body) throw new Error('No <body> in the built page');
 
 const page = [
   '<title>Fontbuilder</title>',
-  '<meta name="claude:viewport-fit-sides" content="cover">',
   `<style>\n${css}\n</style>`,
   body.trim(),
   `<script type="module">\n${js}\n</script>`,

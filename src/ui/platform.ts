@@ -32,12 +32,30 @@ const downloads: Promise<DownloadsCapability | null> = inArtifact
 
 export const canPrint = !inArtifact;
 
+/** Resolves false when files can't be saved here at all (the viewer has no downloads capability). */
+export const savingAvailable: Promise<boolean> = inArtifact ? downloads.then(Boolean) : Promise.resolve(true);
+
 /** Whether `saveFile` can hand over a file with this extension as it is. */
 export function canSaveExtension(ext: string): boolean {
   return !inArtifact || ARTIFACT_EXTENSIONS.has(ext.toLowerCase());
 }
 
-export type SaveOutcome = 'saved' | 'declined' | 'unavailable' | 'failed';
+export type SaveOutcome = 'saved' | 'declined' | 'busy' | 'unavailable' | 'failed';
+
+/**
+ * Runs `task` from a click unless one is still running, so a double click
+ * doesn't open a second save prompt while the first is waiting.
+ */
+export function oneAtATime(task: () => Promise<void>): () => void {
+  let running = false;
+  return () => {
+    if (running) return;
+    running = true;
+    void task().finally(() => {
+      running = false;
+    });
+  };
+}
 
 /** Offers a file to the person. In an Artifact they confirm it first and may decline. */
 export async function saveFile(data: Blob, filename: string): Promise<SaveOutcome> {
@@ -53,7 +71,7 @@ export async function saveFile(data: Blob, filename: string): Promise<SaveOutcom
   } catch (err) {
     const code = (err as { code?: string } | null)?.code;
     if (code === 'declined') return 'declined';
-    if (code === 'rate_limited') return 'failed';
+    if (code === 'rate_limited') return 'busy';
     return code === 'bad_request' || code === 'too_large' ? 'failed' : 'unavailable';
   }
 }
@@ -65,8 +83,10 @@ export function describeOutcome(outcome: SaveOutcome): string {
       return '';
     case 'declined':
       return 'Download cancelled.';
+    case 'busy':
+      return 'Another download is waiting for you to confirm it.';
     case 'unavailable':
-      return "This view can't save files. Try opening the page in a web browser.";
+      return "This view can't save files.";
     default:
       return "The download didn't go through. Wait a moment and try again.";
   }

@@ -19,7 +19,7 @@ test.beforeAll(() => {
   fragment = readFileSync('dist-artifact/e2e.html', 'utf8');
 });
 
-type Mode = 'accept' | 'decline' | 'none';
+type Mode = 'accept' | 'slow' | 'decline' | 'none';
 
 interface Saved {
   filename: string;
@@ -36,9 +36,17 @@ async function openArtifact(page: Page, mode: Mode): Promise<void> {
   await page.addInitScript((m: Mode) => {
     const saves: Saved[] = [];
     (window as unknown as { __saves: Saved[] }).__saves = saves;
+    let promptOpen = false;
     const downloads = Object.freeze({
       save: async ({ filename, data }: { filename: string; data: Blob }) => {
         if (m === 'decline') throw { code: 'declined', message: 'The viewer declined.' };
+        // Like the real viewer: one undecided prompt at a time.
+        if (promptOpen) throw { code: 'rate_limited', message: 'A prompt is already open.' };
+        if (m === 'slow') {
+          promptOpen = true;
+          await new Promise((r) => setTimeout(r, 400));
+          promptOpen = false;
+        }
         const bytes = new Uint8Array(await data.arrayBuffer());
         let binary = '';
         for (const b of bytes) binary += String.fromCharCode(b);
@@ -111,8 +119,20 @@ test('artifact build: a declined download is reported', async ({ page }) => {
   await expect(page.locator('#template-status')).toHaveText('Download cancelled.');
 });
 
-test('artifact build: says so when the viewer cannot save files', async ({ page }) => {
+test('artifact build: a double click opens one save prompt, not two', async ({ page }) => {
+  await openArtifact(page, 'slow');
+  await page.dblclick('#download-template');
+  await nextSave(page, 1);
+  await page.waitForTimeout(600);
+  expect(await page.evaluate(() => (window as unknown as { __saves: Saved[] }).__saves.length)).toBe(1);
+  await expect(page.locator('#template-status')).toHaveText('');
+});
+
+test('artifact build: without the downloads capability, save buttons give way to a notice', async ({ page }) => {
   await openArtifact(page, 'none');
-  await page.click('#download-template');
-  await expect(page.locator('#template-status')).toHaveText("This view can't save files. Try opening the page in a web browser.");
+  await expect(page.locator('#template-status')).toContainText("This view can't save files", { timeout: 5_000 });
+  await expect(page.locator('#download-template')).toBeHidden();
+  await expect(page.locator('#download-font')).toBeHidden();
+  await expect(page.locator('#download-image')).toBeHidden();
+  await expect(page.locator('#download-status')).toContainText('You can still try it out in the preview above.');
 });

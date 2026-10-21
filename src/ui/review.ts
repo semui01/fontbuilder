@@ -85,6 +85,10 @@ export function setupReview(state: AppState, fonts: FontController, drawInstead:
     const have = basic.filter((c) => state.glyphs.has(c)).length;
     const extra = PAGES[1].chars.filter((c) => state.glyphs.has(c)).length;
     clearBox.hidden = state.glyphs.size === 0;
+    if (clearBox.hidden) {
+      clearAll.hidden = false;
+      clearConfirm.hidden = true;
+    }
     summary.textContent = state.glyphs.size
       ? `${have} of ${basic.length} basic characters${extra ? `, plus ${extra} extra` : ''}. Tap any character to check, redraw or remove it.`
       : 'Nothing yet. Add some handwriting above.';

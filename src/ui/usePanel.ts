@@ -2,7 +2,7 @@ import { sanitizeFamilyName, type FontSettings } from '../core/font';
 import { createZip } from '../core/zip';
 import { byId, debounce } from './dom';
 import type { FontController } from './fontController';
-import { canSaveExtension, describeOutcome, saveFile, type SaveOutcome } from './platform';
+import { canSaveExtension, describeOutcome, oneAtATime, saveFile, savingAvailable, type SaveOutcome } from './platform';
 import type { AppState } from './state';
 
 function installNote(family: string): string {
@@ -132,21 +132,38 @@ export function setupTuneAndUse(state: AppState, fonts: FontController): () => v
     downloadFont.textContent = 'Download font (.zip)';
     byId('download-note').hidden = false;
   }
-  downloadFont.addEventListener('click', async () => {
-    const built = fonts.buildNow();
-    if (!built) return;
-    downloadStatus.textContent = '';
-    downloadStatus.textContent = describeOutcome(await saveFont(built.buffer, sanitizeFamilyName(state.settings.familyName)));
-  });
+  downloadFont.addEventListener(
+    'click',
+    oneAtATime(async () => {
+      const built = fonts.buildNow();
+      if (!built) return;
+      downloadStatus.textContent = '';
+      downloadStatus.textContent = describeOutcome(await saveFont(built.buffer, sanitizeFamilyName(state.settings.familyName)));
+    }),
+  );
 
-  downloadImage.addEventListener('click', async () => {
-    if (!fonts.family) return;
-    try {
-      const blob = await textImage(text.value, fonts.family, ink);
-      imageStatus.textContent = describeOutcome(await saveFile(blob, `${sanitizeFamilyName(state.settings.familyName)}.png`));
-    } catch (err) {
-      imageStatus.textContent = err instanceof Error ? err.message : String(err);
-    }
+  downloadImage.addEventListener(
+    'click',
+    oneAtATime(async () => {
+      if (!fonts.family) return;
+      imageStatus.textContent = '';
+      try {
+        const blob = await textImage(text.value, fonts.family, ink);
+        imageStatus.textContent = describeOutcome(await saveFile(blob, `${sanitizeFamilyName(state.settings.familyName)}.png`));
+      } catch (err) {
+        imageStatus.textContent = err instanceof Error ? err.message : String(err);
+      }
+    }),
+  );
+
+  // Where nothing can be saved, say so once instead of offering buttons that can't work.
+  void savingAvailable.then((ok) => {
+    if (ok) return;
+    downloadFont.hidden = true;
+    downloadImage.hidden = true;
+    byId('download-note').hidden = true;
+    downloadStatus.textContent =
+      "This view can't save files, so the font can't be downloaded here. You can still try it out in the preview above.";
   });
 
   copyImage.addEventListener('click', async () => {

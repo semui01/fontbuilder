@@ -13,7 +13,11 @@
   --danger: #b42318;
   --paper: #fffdf8;
   --paper-line: #ebe5d8;
+  /* Text on the paper surfaces, which stay light in both themes. */
+  --paper-text: #1d2433;
+  --paper-muted: #5d6475;
   --ink: #1d2433;
+  --swatch-ring: #b3ac9f;
   --radius: 14px;
   --shadow: 0 1px 2px rgb(29 36 51 / 6%), 0 4px 16px rgb(29 36 51 / 5%);
   --hw-font: system-ui;
@@ -36,6 +40,7 @@
     --ok: #5fd08f;
     --warn: #f0b456;
     --danger: #ff8a7a;
+    --swatch-ring: #8e96a8;
     --shadow: none;
     color-scheme: dark;
   }
@@ -53,6 +58,7 @@
   --ok: #5fd08f;
   --warn: #f0b456;
   --danger: #ff8a7a;
+  --swatch-ring: #8e96a8;
   --shadow: none;
   color-scheme: dark;
 }
@@ -243,6 +249,10 @@ h3 {
 .btn.danger {
   color: var(--danger);
 }
+.step-head > .clear-all {
+  flex: none;
+  margin-left: auto;
+}
 .clear-all .confirm {
   display: flex;
   flex-wrap: wrap;
@@ -312,11 +322,10 @@ input[type='range'] {
 /* Tabs */
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 18px;
-  overflow-x: auto;
-  scrollbar-width: none;
 }
 .tab {
   font: inherit;
@@ -507,6 +516,7 @@ input[type='range'] {
 }
 .draw-char-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   align-items: center;
   margin-bottom: 10px;
@@ -559,7 +569,7 @@ input[type='range'] {
   border: 1px solid var(--paper-line);
   border-radius: 10px;
   background: var(--paper);
-  color: #1d2433;
+  color: var(--paper-text);
   font: inherit;
   padding: 0;
   cursor: pointer;
@@ -576,7 +586,7 @@ input[type='range'] {
   top: 3px;
   left: 6px;
   font-size: 0.7rem;
-  color: #8a8f9c;
+  color: var(--paper-muted);
 }
 .glyph.missing {
   background: transparent;
@@ -624,7 +634,7 @@ input[type='range'] {
   border-radius: 50%;
   background: var(--c);
   border: 3px solid var(--card);
-  box-shadow: 0 0 0 1px var(--line);
+  box-shadow: 0 0 0 1px var(--swatch-ring);
   cursor: pointer;
 }
 .swatch input:checked + span {
@@ -727,6 +737,9 @@ dialog::backdrop {
   place-items: center;
   overflow: hidden;
 }
+.dialog-preview .hint {
+  color: var(--paper-muted);
+}
 .dialog-preview svg {
   height: 180px;
   width: auto;
@@ -747,12 +760,18 @@ dialog::backdrop {
   padding-bottom: 40px;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 720px) {
   .tab .long {
     display: none;
   }
   .tab .short {
     display: inline;
+  }
+}
+
+@media (max-width: 520px) {
+  .tab .badge {
+    display: none;
   }
 }
 
