@@ -2,8 +2,9 @@ import { PAGES } from '../core/charset';
 import { DEFAULT_INK_RATIO, scanTemplate } from '../core/scan';
 import { PAPER_SIZES, templatePdf, templateSvg, type Paper } from '../core/template';
 import type { GrayImage } from '../core/types';
-import { byId, debounce, downloadBlob, fileDrop, h, nextFrame } from './dom';
+import { byId, debounce, fileDrop, h, nextFrame } from './dom';
 import { loadImageFile } from './imageio';
+import { canPrint, describeOutcome, saveFile } from './platform';
 import type { AppState } from './state';
 
 interface Scan {
@@ -24,7 +25,11 @@ function selectedPages(): number[] {
 }
 
 function printTemplate(paper: Paper): void {
-  const frame = byId<HTMLIFrameElement>('print-frame');
+  let frame = document.getElementById('print-frame') as HTMLIFrameElement | null;
+  if (!frame) {
+    frame = h('iframe', { class: 'print-frame', attrs: { id: 'print-frame', title: 'Template for printing', tabindex: -1, 'aria-hidden': 'true' } });
+    document.body.append(frame);
+  }
   const size = PAPER_SIZES[paper];
   const pages = PAGES.filter((p) => selectedPages().includes(p.id))
     .map((p) => `<div class="page">${templateSvg(p, paper)}</div>`)
@@ -37,8 +42,8 @@ function printTemplate(paper: Paper): void {
     svg { display: block; }
   </style></head><body>${pages}</body></html>`;
   frame.onload = () => {
-    frame.contentWindow?.focus();
-    frame.contentWindow?.print();
+    frame?.contentWindow?.focus();
+    frame?.contentWindow?.print();
   };
 }
 
@@ -48,11 +53,17 @@ export function setupTemplatePanel(state: AppState): void {
   const results = byId('template-results');
   if (navigator.language && !/^en-(US|CA)|^es-(MX|US)/i.test(navigator.language)) paper.value = 'a4';
 
-  byId('download-template').addEventListener('click', () => {
+  const templateStatus = byId('template-status');
+  byId('download-template').addEventListener('click', async () => {
     const pdf = templatePdf(selectedPages(), paper.value as Paper);
-    downloadBlob(new Blob([pdf as BlobPart], { type: 'application/pdf' }), 'handwriting-template.pdf');
+    templateStatus.textContent = describeOutcome(
+      await saveFile(new Blob([pdf as BlobPart], { type: 'application/pdf' }), 'handwriting-template.pdf'),
+    );
   });
-  byId('print-template').addEventListener('click', () => printTemplate(paper.value as Paper));
+  const printButton = byId('print-template');
+  // Some hosts (e.g. an Artifact viewer) can't open the print dialog; the PDF covers printing there.
+  printButton.hidden = !canPrint;
+  printButton.addEventListener('click', () => printTemplate(paper.value as Paper));
 
   const scans: Scan[] = [];
   // Sensitivity slider: higher = more of the grey counts as ink.

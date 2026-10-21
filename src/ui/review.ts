@@ -20,7 +20,9 @@ const ORIGIN_TEXT = {
 export function setupReview(state: AppState, fonts: FontController, drawInstead: (char: string) => void): () => void {
   const grid = byId('glyph-grid');
   const summary = byId('review-summary');
+  const clearBox = byId('clear-all-box');
   const clearAll = byId<HTMLButtonElement>('clear-all');
+  const clearConfirm = byId('clear-confirm');
   const dialog = byId<HTMLDialogElement>('glyph-dialog');
   let dialogChar = '';
 
@@ -63,8 +65,18 @@ export function setupReview(state: AppState, fonts: FontController, drawInstead:
     if (dialog.returnValue === 'draw') drawInstead(dialogChar);
   });
 
-  clearAll.addEventListener('click', () => {
-    if (confirm('Remove all your characters and start over?')) state.clearGlyphs();
+  // An in-page confirmation: browser confirm() dialogs are blocked in some embeds.
+  const showConfirm = (open: boolean): void => {
+    clearAll.hidden = open;
+    clearConfirm.hidden = !open;
+    (open ? byId('clear-no') : clearAll).focus();
+  };
+  clearAll.addEventListener('click', () => showConfirm(true));
+  byId('clear-no').addEventListener('click', () => showConfirm(false));
+  byId('clear-yes').addEventListener('click', () => {
+    clearAll.hidden = false;
+    clearConfirm.hidden = true;
+    state.clearGlyphs();
   });
 
   const render = (): void => {
@@ -72,7 +84,7 @@ export function setupReview(state: AppState, fonts: FontController, drawInstead:
     const basic = PAGES[0].chars;
     const have = basic.filter((c) => state.glyphs.has(c)).length;
     const extra = PAGES[1].chars.filter((c) => state.glyphs.has(c)).length;
-    clearAll.hidden = state.glyphs.size === 0;
+    clearBox.hidden = state.glyphs.size === 0;
     summary.textContent = state.glyphs.size
       ? `${have} of ${basic.length} basic characters${extra ? `, plus ${extra} extra` : ''}. Tap any character to check, redraw or remove it.`
       : 'Nothing yet. Add some handwriting above.';

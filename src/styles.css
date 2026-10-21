@@ -7,6 +7,7 @@
   --accent: #2f4fd1;
   --accent-hover: #2541b3;
   --accent-soft: #e8edff;
+  --on-accent: #ffffff;
   --ok: #1d7a45;
   --warn: #9a5b00;
   --danger: #b42318;
@@ -19,8 +20,10 @@
   color-scheme: light;
 }
 
+/* Dark theme: follows the system setting unless a host sets data-theme explicitly.
+   The handwriting surfaces (--paper, --ink) stay light on purpose, like real paper. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #14161c;
     --card: #1c1f27;
     --text: #e9ebf1;
@@ -29,12 +32,29 @@
     --accent: #7f98ff;
     --accent-hover: #9aaeff;
     --accent-soft: #252c48;
+    --on-accent: #0f1530;
     --ok: #5fd08f;
     --warn: #f0b456;
     --danger: #ff8a7a;
     --shadow: none;
     color-scheme: dark;
   }
+}
+:root[data-theme='dark'] {
+  --bg: #14161c;
+  --card: #1c1f27;
+  --text: #e9ebf1;
+  --muted: #a3a9b8;
+  --line: #2e3340;
+  --accent: #7f98ff;
+  --accent-hover: #9aaeff;
+  --accent-soft: #252c48;
+  --on-accent: #0f1530;
+  --ok: #5fd08f;
+  --warn: #f0b456;
+  --danger: #ff8a7a;
+  --shadow: none;
+  color-scheme: dark;
 }
 
 * {
@@ -55,7 +75,8 @@ body {
 .wrap {
   max-width: 1040px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 
 .visually-hidden {
@@ -166,7 +187,7 @@ code {
   display: grid;
   place-items: center;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   font-weight: 700;
 }
 h2 {
@@ -210,7 +231,7 @@ h3 {
 .btn.primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 .btn.primary:hover:not(:disabled) {
   background: var(--accent-hover);
@@ -221,6 +242,17 @@ h3 {
 }
 .btn.danger {
   color: var(--danger);
+}
+.clear-all .confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+.clear-all .confirm[hidden] {
+  display: none;
 }
 .btn.big {
   padding: 12px 22px;

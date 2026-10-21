@@ -70,6 +70,7 @@
                 <button class="btn primary" id="download-template">Download PDF</button>
                 <button class="btn" id="print-template">Print</button>
               </div>
+              <p class="status" id="template-status" aria-live="polite"></p>
             </li>
             <li>
               <strong>Fill it in</strong> with a dark pen or felt-tip, one character per box, resting on the dotted line.
@@ -163,7 +164,14 @@
             <h2 id="review-title">Check your characters</h2>
             <p id="review-summary">Nothing yet. Add some handwriting above.</p>
           </div>
-          <button class="btn subtle" id="clear-all" hidden>Start over</button>
+          <div class="clear-all" id="clear-all-box" hidden>
+            <button class="btn subtle" id="clear-all">Start over</button>
+            <div class="confirm" id="clear-confirm" role="group" aria-label="Confirm start over" hidden>
+              <span>Remove all your characters?</span>
+              <button class="btn danger" id="clear-yes">Remove all</button>
+              <button class="btn" id="clear-no">Keep them</button>
+            </div>
+          </div>
         </div>
         <div id="glyph-grid"></div>
       </section>
@@ -215,6 +223,8 @@
           </label>
           <button class="btn primary big" id="download-font" disabled>Download font (.otf)</button>
         </div>
+        <p class="hint" id="download-note" hidden>You'll get a .zip file with your font inside. Open it, then install the .otf file as described below.</p>
+        <p class="status" id="download-status" aria-live="polite"></p>
 
         <div class="image-export">
           <div>
@@ -312,7 +322,6 @@
         </div>
       </form>
     </dialog>
-    <iframe id="print-frame" title="Template for printing" class="print-frame" tabindex="-1" aria-hidden="true"></iframe>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

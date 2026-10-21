@@ -1,7 +1,33 @@
 import { sanitizeFamilyName, type FontSettings } from '../core/font';
-import { byId, debounce, downloadBlob } from './dom';
+import { createZip } from '../core/zip';
+import { byId, debounce } from './dom';
 import type { FontController } from './fontController';
+import { canSaveExtension, describeOutcome, saveFile, type SaveOutcome } from './platform';
 import type { AppState } from './state';
+
+function installNote(family: string): string {
+  return [
+    `Your font: ${family}.otf`,
+    '',
+    `Windows: open ${family}.otf and click Install. Restart Word or Outlook if they were open.`,
+    `Mac: double-click ${family}.otf and click Install Font.`,
+    'iPhone and iPad: install it with a font installer app from the App Store.',
+    '',
+    'Other people only see the font if they have it installed too. For emails and',
+    'shared documents, send a PDF or paste your text as an image.',
+    '',
+  ].join('\r\n');
+}
+
+/** Offers the font as .otf, or zipped with a short install note where .otf can't be saved directly. */
+function saveFont(buffer: ArrayBuffer, family: string): Promise<SaveOutcome> {
+  if (canSaveExtension('otf')) return saveFile(new Blob([buffer], { type: 'font/otf' }), `${family}.otf`);
+  const zip = createZip([
+    { name: `${family}.otf`, data: new Uint8Array(buffer) },
+    { name: 'How to install.txt', data: new TextEncoder().encode(installNote(family)) },
+  ]);
+  return saveFile(new Blob([zip as BlobPart], { type: 'application/zip' }), `${family}.zip`);
+}
 
 /** Renders the preview text in the handwriting font as a transparent PNG. */
 async function textImage(text: string, family: string, color: string): Promise<Blob> {
@@ -36,6 +62,7 @@ export function setupTuneAndUse(state: AppState, fonts: FontController): () => v
   const copyImage = byId<HTMLButtonElement>('copy-image');
   const downloadImage = byId<HTMLButtonElement>('download-image');
   const imageStatus = byId('image-status');
+  const downloadStatus = byId('download-status');
   const snippet = byId('css-snippet');
 
   // Settings controls.
@@ -101,19 +128,22 @@ export function setupTuneAndUse(state: AppState, fonts: FontController): () => v
   });
   updateSnippet();
 
-  downloadFont.addEventListener('click', () => {
+  if (!canSaveExtension('otf')) {
+    downloadFont.textContent = 'Download font (.zip)';
+    byId('download-note').hidden = false;
+  }
+  downloadFont.addEventListener('click', async () => {
     const built = fonts.buildNow();
     if (!built) return;
-    const family = sanitizeFamilyName(state.settings.familyName);
-    downloadBlob(new Blob([built.buffer], { type: 'font/otf' }), `${family}.otf`);
+    downloadStatus.textContent = '';
+    downloadStatus.textContent = describeOutcome(await saveFont(built.buffer, sanitizeFamilyName(state.settings.familyName)));
   });
 
   downloadImage.addEventListener('click', async () => {
     if (!fonts.family) return;
     try {
       const blob = await textImage(text.value, fonts.family, ink);
-      downloadBlob(blob, `${sanitizeFamilyName(state.settings.familyName)}.png`);
-      imageStatus.textContent = '';
+      imageStatus.textContent = describeOutcome(await saveFile(blob, `${sanitizeFamilyName(state.settings.familyName)}.png`));
     } catch (err) {
       imageStatus.textContent = err instanceof Error ? err.message : String(err);
     }
